@@ -20,14 +20,12 @@ jobs:
 
     - name: Create terraform.auto.tfvars from GitHub Secrets
       run: |
-        cat <<EOF > main/terraform.auto.tfvars
-ami           = "${{ secrets.AMI }}"
-instance_type = "${{ secrets.INSTANCE_TYPE }}"
-region        = "${{ secrets.REGION }}"
-az            = "${{ secrets.AZ }}"
-subnet_cidr   = "${{ secrets.SUBNET_CIDR }}"
-vpc_cidr      = "${{ secrets.VPC_CIDR }}"
-EOF
+        echo "ami           = \"${{ secrets.AMI }}\"" >> main/terraform.auto.tfvars
+        echo "instance_type = \"${{ secrets.INSTANCE_TYPE }}\"" >> main/terraform.auto.tfvars
+        echo "region        = \"${{ secrets.REGION }}\"" >> main/terraform.auto.tfvars
+        echo "az            = \"${{ secrets.AZ }}\"" >> main/terraform.auto.tfvars
+        echo "subnet_cidr   = \"${{ secrets.SUBNET_CIDR }}\"" >> main/terraform.auto.tfvars
+        echo "vpc_cidr      = \"${{ secrets.VPC_CIDR }}\"" >> main/terraform.auto.tfvars
 
     - name: Terraform Init
       run: terraform init
