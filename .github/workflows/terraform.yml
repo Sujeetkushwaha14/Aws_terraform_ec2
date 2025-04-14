@@ -19,6 +19,9 @@ jobs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
+      
+    - name: Show TF_VARS content (for debugging)
+      run: echo "${{ secrets.TF_VARS }}"
 
     - name: Write tfvars from secret
       run: |
