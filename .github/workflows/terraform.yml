@@ -19,9 +19,13 @@ jobs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
-      
-    - name: Show TF_VARS content (for debugging)
-      run: echo "${{ secrets.TF_VARS }}"
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1  # Replace with your region
 
     - name: Write tfvars from secret
       run: |
