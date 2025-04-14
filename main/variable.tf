@@ -1,6 +1,19 @@
-variable "ami" {}
-variable "subnet_cidr" {}
-variable "vpc_cidr" {}
-variable "az" {}
-variable "instance_type" {}
-variable "region" {}
+variable "ami" {
+    type = string
+}
+variable "subnet_cidr" {
+    type = string
+}
+variable "vpc_cidr" {
+    type = string
+}
+variable "az" {
+    type = string
+
+}
+variable "instance_type" {
+    type = string
+}
+variable "region" {
+    type = string
+}
