@@ -30,6 +30,9 @@ jobs:
     - name: Write tfvars from secret
       run: |
         echo "${{ secrets.TF_VARS }}" > terraform.auto.tfvars
+    - name: Show tfvars content
+      run: cat terraform.auto.tfvars
+
 
     - name: Terraform Init
       run: terraform init
