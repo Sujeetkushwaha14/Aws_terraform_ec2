@@ -1,5 +1,5 @@
-name: Terraform CI
- 
+name: Terraform Workflow
+
 on:
   push:
     branches:
@@ -9,36 +9,41 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./main
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - name: Checkout code from repo
+      uses: actions/checkout@v2
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-south-1  # Replace with your region
+        terraform_version: '1.5.0'
 
-    - name: Write tfvars from secret
+    - name: Create terraform.auto.tfvars from GitHub Secrets
       run: |
-        echo "${{ secrets.TF_VARS }}" > terraform.auto.tfvars
+        echo "ami           = \"${{ secrets.AMI }}\"" >> main/terraform.auto.tfvars
+        echo "instance_type = \"${{ secrets.INSTANCE_TYPE }}\"" >> main/terraform.auto.tfvars
+        echo "region        = \"${{ secrets.REGION }}\"" >> main/terraform.auto.tfvars
+        echo "az            = \"${{ secrets.AZ }}\"" >> main/terraform.auto.tfvars
+        echo "subnet_cidr   = \"${{ secrets.SUBNET_CIDR }}\"" >> main/terraform.auto.tfvars
+        echo "vpc_cidr      = \"${{ secrets.VPC_CIDR }}\"" >> main/terraform.auto.tfvars
 
     - name: Terraform Init
       run: terraform init
-
-    - name: Terraform Validate
-      run: terraform validate
+      working-directory: main
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: Terraform Plan
-      run: terraform plan
+      run: terraform plan -var-file=terraform.auto.tfvars
+      working-directory: main
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve
+      run: terraform apply -auto-approve -var-file=terraform.auto.tfvars
+      working-directory: main
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
