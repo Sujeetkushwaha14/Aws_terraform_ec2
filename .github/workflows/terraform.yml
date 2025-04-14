@@ -1,40 +1,48 @@
-name: Terraform CI
+name: Terraform Workflow
 
 on:
   push:
     branches:
-      - main  # Ye workflow main branch pe push hone par chalega
+      - main
 
 jobs:
   terraform:
-    runs-on: ubuntu-latest  # Ubuntu pe run hoga
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3  # GitHub repo ko checkout karna
+    - name: Checkout code from repo
+      uses: actions/checkout@v2
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3  # Terraform setup karna
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2  # AWS credentials set karna
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+        terraform_version: '1.5.0'
 
-    - name: Write tfvars from secret
+    - name: Create terraform.auto.tfvars from GitHub Secrets
       run: |
-        echo "${{ secrets.TF_VARS }}" > terraform.auto.tfvars  # Secret ko terraform.auto.tfvars file me likhna
+        cat <<EOF > main/terraform.auto.tfvars
+ami           = "${{ secrets.AMI }}"
+instance_type = "${{ secrets.INSTANCE_TYPE }}"
+region        = "${{ secrets.REGION }}"
+az            = "${{ secrets.AZ }}"
+subnet_cidr   = "${{ secrets.SUBNET_CIDR }}"
+vpc_cidr      = "${{ secrets.VPC_CIDR }}"
+EOF
 
     - name: Terraform Init
-      run: terraform init  # Terraform ko initialize karna
-
-    - name: Terraform Validate
-      run: terraform validate  # Terraform configuration ko validate karna
+      run: terraform init
+      working-directory: main
 
     - name: Terraform Plan
-      run: terraform plan  # Terraform plan generate karna
+      run: terraform plan
+      working-directory: main
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve  # Terraform apply karna
+      run: terraform apply -auto-approve
+      working-directory: main
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
